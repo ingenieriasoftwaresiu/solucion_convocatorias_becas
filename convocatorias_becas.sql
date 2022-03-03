@@ -11,7 +11,7 @@
  Target Server Version : 100130
  File Encoding         : 65001
 
- Date: 18/02/2022 15:28:48
+ Date: 03/03/2022 11:35:13
 */
 
 SET NAMES utf8mb4;
@@ -38,7 +38,10 @@ CREATE TABLE `convocatorias`  (
   `id` int NOT NULL AUTO_INCREMENT,
   `numero` varchar(5) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL,
   `nombre` varchar(500) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL,
-  PRIMARY KEY (`id`) USING BTREE
+  `id_estado` int NOT NULL,
+  PRIMARY KEY (`id`) USING BTREE,
+  INDEX `id_estado`(`id_estado`) USING BTREE,
+  CONSTRAINT `convocatorias_ibfk_1` FOREIGN KEY (`id_estado`) REFERENCES `estados_convocatoria` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION
 ) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8 COLLATE = utf8_general_ci ROW_FORMAT = Compact;
 
 -- ----------------------------
@@ -108,6 +111,7 @@ DROP TABLE IF EXISTS `documentosxconvocatoria`;
 CREATE TABLE `documentosxconvocatoria`  (
   `id_documento` int NOT NULL,
   `id_convocatoria` int NOT NULL,
+  `observacion` varchar(150) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL,
   PRIMARY KEY (`id_documento`, `id_convocatoria`) USING BTREE,
   INDEX `id_convocatoria`(`id_convocatoria`) USING BTREE,
   CONSTRAINT `documentosxconvocatoria_ibfk_1` FOREIGN KEY (`id_documento`) REFERENCES `documentos_soporte` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION,
@@ -129,6 +133,16 @@ CREATE TABLE `documentosxpostulacion`  (
   CONSTRAINT `documentosxpostulacion_ibfk_1` FOREIGN KEY (`id_postulacion`) REFERENCES `postulaciones` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION,
   CONSTRAINT `documentosxpostulacion_ibfk_2` FOREIGN KEY (`id_documento`) REFERENCES `documentos_soporte` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION
 ) ENGINE = InnoDB CHARACTER SET = utf8 COLLATE = utf8_general_ci ROW_FORMAT = Compact;
+
+-- ----------------------------
+-- Table structure for estados_convocatoria
+-- ----------------------------
+DROP TABLE IF EXISTS `estados_convocatoria`;
+CREATE TABLE `estados_convocatoria`  (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `nombre` varchar(100) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL,
+  PRIMARY KEY (`id`) USING BTREE
+) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8 COLLATE = utf8_general_ci ROW_FORMAT = Compact;
 
 -- ----------------------------
 -- Table structure for estados_postulacion
@@ -183,6 +197,36 @@ CREATE TABLE `focosxconvocatoria`  (
 ) ENGINE = InnoDB CHARACTER SET = utf8 COLLATE = utf8_general_ci ROW_FORMAT = Compact;
 
 -- ----------------------------
+-- Table structure for parametros_generales
+-- ----------------------------
+DROP TABLE IF EXISTS `parametros_generales`;
+CREATE TABLE `parametros_generales`  (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `nombre_contacto` varchar(100) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL,
+  `correo_contacto` varchar(100) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL,
+  `telefono_contacto` varchar(100) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL,
+  `usuario_smtp` varchar(50) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL,
+  `clave_smtp` varchar(50) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL,
+  `direccion_smtp` varchar(50) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL,
+  `puerto_smtp` varchar(5) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL,
+  `ruta_archivos` varchar(255) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL,
+  PRIMARY KEY (`id`) USING BTREE
+) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8 COLLATE = utf8_general_ci ROW_FORMAT = Compact;
+
+-- ----------------------------
+-- Table structure for parametros_notificaciones
+-- ----------------------------
+DROP TABLE IF EXISTS `parametros_notificaciones`;
+CREATE TABLE `parametros_notificaciones`  (
+  `id` int NOT NULL,
+  `nombre` varchar(100) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL,
+  `asunto_mensaje` varchar(150) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL,
+  `cuerpo_mensaje` varchar(255) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL,
+  `estado_notificacion` varchar(2) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL,
+  PRIMARY KEY (`id`) USING BTREE
+) ENGINE = InnoDB CHARACTER SET = utf8 COLLATE = utf8_general_ci ROW_FORMAT = Compact;
+
+-- ----------------------------
 -- Table structure for postulaciones
 -- ----------------------------
 DROP TABLE IF EXISTS `postulaciones`;
@@ -213,14 +257,28 @@ CREATE TABLE `postulaciones`  (
 ) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8 COLLATE = utf8_general_ci ROW_FORMAT = Compact;
 
 -- ----------------------------
--- Table structure for preguntas_postulacion
+-- Table structure for preguntas_convocatoria
 -- ----------------------------
-DROP TABLE IF EXISTS `preguntas_postulacion`;
-CREATE TABLE `preguntas_postulacion`  (
+DROP TABLE IF EXISTS `preguntas_convocatoria`;
+CREATE TABLE `preguntas_convocatoria`  (
   `id` int NOT NULL AUTO_INCREMENT,
   `descripcion` varchar(500) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL,
   PRIMARY KEY (`id`) USING BTREE
 ) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8 COLLATE = utf8_general_ci ROW_FORMAT = Compact;
+
+-- ----------------------------
+-- Table structure for preguntasxconvocatoria
+-- ----------------------------
+DROP TABLE IF EXISTS `preguntasxconvocatoria`;
+CREATE TABLE `preguntasxconvocatoria`  (
+  `id_convocatoria` int NOT NULL,
+  `id_pregunta` int NOT NULL,
+  `observacion` varchar(150) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL,
+  PRIMARY KEY (`id_convocatoria`, `id_pregunta`) USING BTREE,
+  INDEX `id_pregunta`(`id_pregunta`) USING BTREE,
+  CONSTRAINT `preguntasxconvocatoria_ibfk_1` FOREIGN KEY (`id_convocatoria`) REFERENCES `convocatorias` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION,
+  CONSTRAINT `preguntasxconvocatoria_ibfk_2` FOREIGN KEY (`id_pregunta`) REFERENCES `preguntas_convocatoria` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION
+) ENGINE = InnoDB CHARACTER SET = utf8 COLLATE = utf8_general_ci ROW_FORMAT = Compact;
 
 -- ----------------------------
 -- Table structure for preguntasxpostulacion
@@ -229,9 +287,12 @@ DROP TABLE IF EXISTS `preguntasxpostulacion`;
 CREATE TABLE `preguntasxpostulacion`  (
   `id_pregunta` int NOT NULL,
   `id_postulacion` int NOT NULL,
+  `respuesta` varchar(2) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL,
+  `cumple` varchar(2) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL,
+  `observacion` varchar(150) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL,
   PRIMARY KEY (`id_pregunta`, `id_postulacion`) USING BTREE,
   INDEX `id_postulacion`(`id_postulacion`) USING BTREE,
-  CONSTRAINT `preguntasxpostulacion_ibfk_1` FOREIGN KEY (`id_pregunta`) REFERENCES `preguntas_postulacion` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION,
+  CONSTRAINT `preguntasxpostulacion_ibfk_1` FOREIGN KEY (`id_pregunta`) REFERENCES `preguntas_convocatoria` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION,
   CONSTRAINT `preguntasxpostulacion_ibfk_2` FOREIGN KEY (`id_postulacion`) REFERENCES `postulaciones` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION
 ) ENGINE = InnoDB CHARACTER SET = utf8 COLLATE = utf8_general_ci ROW_FORMAT = Compact;
 
